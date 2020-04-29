@@ -1,5 +1,5 @@
 /**
- * Copyright 2010-2019 the original author or authors.
+ * Copyright 2010-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public final class SqlSessionUtils {
     notNull(sessionFactory, NO_SQL_SESSION_FACTORY_SPECIFIED);
     notNull(executorType, NO_EXECUTOR_TYPE_SPECIFIED);
 
-    //从当前线程中看能否取到SqlSession
+    // 从当前线程中看能否取到SqlSession
     SqlSessionHolder holder = (SqlSessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 
     SqlSession session = sessionHolder(executorType, holder);
@@ -102,7 +102,7 @@ public final class SqlSessionUtils {
       return session;
     }
 
-    //创建一个新的SqlSession（DefaultSqlSession）
+    // 创建一个新的SqlSession（DefaultSqlSession）
     LOGGER.debug(() -> "Creating a new SqlSession");
     session = sessionFactory.openSession(executorType);
 
@@ -137,9 +137,9 @@ public final class SqlSessionUtils {
         LOGGER.debug(() -> "Registering transaction synchronization for SqlSession [" + session + "]");
 
         holder = new SqlSessionHolder(session, executorType, exceptionTranslator);
-        //绑定SqlSession到当前线程ThreadLocal<Map<Object, Object>> resources
+        // 绑定SqlSession到当前线程ThreadLocal<Map<Object, Object>> resources
         TransactionSynchronizationManager.bindResource(sessionFactory, holder);
-        //注册事务同步器到当前线程ThreadLocal<Set<TransactionSynchronization>> synchronizations
+        // 注册事务同步器到当前线程ThreadLocal<Set<TransactionSynchronization>> synchronizations
         TransactionSynchronizationManager
             .registerSynchronization(new SqlSessionSynchronization(holder, sessionFactory));
         holder.setSynchronizedWithTransaction(true);
@@ -162,6 +162,7 @@ public final class SqlSessionUtils {
 
   /**
    * 从SqlSessionHolder中提取SqlSession
+   * 
    * @param executorType
    * @param holder
    * @return
@@ -209,7 +210,8 @@ public final class SqlSessionUtils {
   /**
    * SqlSession是否被spring管理
    *
-   * <p>Returns if the {@code SqlSession} passed as an argument is being managed by Spring
+   * <p>
+   * Returns if the {@code SqlSession} passed as an argument is being managed by Spring
    *
    * @param session
    *          a MyBatis SqlSession to check
@@ -228,7 +230,8 @@ public final class SqlSessionUtils {
 
   /**
    * 事务同步器
-   * <p>Callback for cleaning up resources. It cleans TransactionSynchronizationManager and also commits and closes the
+   * <p>
+   * Callback for cleaning up resources. It cleans TransactionSynchronizationManager and also commits and closes the
    * {@code SqlSession}. It assumes that {@code Connection} life cycle will be managed by
    * {@code DataSourceTransactionManager} or {@code JtaTransactionManager}
    */
@@ -293,7 +296,7 @@ public final class SqlSessionUtils {
       if (TransactionSynchronizationManager.isActualTransactionActive()) {
         try {
           LOGGER.debug(() -> "Transaction synchronization committing SqlSession [" + this.holder.getSqlSession() + "]");
-          //通过spring提交事务
+          // 通过spring提交事务
           this.holder.getSqlSession().commit();
         } catch (PersistenceException p) {
           if (this.holder.getPersistenceExceptionTranslator() != null) {
