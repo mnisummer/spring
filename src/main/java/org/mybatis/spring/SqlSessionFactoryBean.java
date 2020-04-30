@@ -1,5 +1,5 @@
 /**
- * Copyright 2010-2019 the original author or authors.
+ * Copyright 2010-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,9 @@ public class SqlSessionFactoryBean
   private TypeHandler<?>[] typeHandlers;
 
   private String typeHandlersPackage;
+
+  @SuppressWarnings("rawtypes")
+  private Class<? extends TypeHandler> defaultEnumTypeHandler;
 
   private Class<?>[] typeAliases;
 
@@ -291,6 +294,18 @@ public class SqlSessionFactoryBean
    */
   public void setTypeHandlers(TypeHandler<?>... typeHandlers) {
     this.typeHandlers = typeHandlers;
+  }
+
+  /**
+   * Set the default type handler class for enum.
+   *
+   * @since 2.0.5
+   * @param defaultEnumTypeHandler
+   *          The default type handler class for enum
+   */
+  public void setDefaultEnumTypeHandler(
+      @SuppressWarnings("rawtypes") Class<? extends TypeHandler> defaultEnumTypeHandler) {
+    this.defaultEnumTypeHandler = defaultEnumTypeHandler;
   }
 
   /**
@@ -479,7 +494,7 @@ public class SqlSessionFactoryBean
    * Build a {@code SqlSessionFactory} instance.
    *
    * The default implementation uses the standard MyBatis {@code XMLConfigBuilder} API to build a
-   * {@code SqlSessionFactory} instance based on an Reader. Since 1.3.0, it can be specified a {@link Configuration}
+   * {@code SqlSessionFactory} instance based on a Reader. Since 1.3.0, it can be specified a {@link Configuration}
    * instance directly(without config file).
    *
    * @return SqlSessionFactory
@@ -544,6 +559,8 @@ public class SqlSessionFactoryBean
         LOGGER.debug(() -> "Registered type handler: '" + typeHandler + "'");
       });
     }
+
+    targetConfiguration.setDefaultEnumTypeHandler(defaultEnumTypeHandler);
 
     if (!isEmpty(this.scriptingLanguageDrivers)) {
       Stream.of(this.scriptingLanguageDrivers).forEach(languageDriver -> {
